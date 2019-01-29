@@ -1,0 +1,95 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*!
+    The following code snippet was taken from https://fydo.net/gamedev/dynamic-arrays, all credits goes to the writer.
+    I have modified some parts of the code to do what i need with dynamic arrays; Dynamic arrays will be used to store
+    the words dynamically in multiple arrays, and by the end of the code, words with similar sizes will be stored in
+    each array, thus when displaying we can sort them in anyway we want.
+    The end of the snippet will be marked with multiple slash chracters '/'.
+*/
+typedef struct {
+    char *word;
+} DArray;
+
+DArray 	*words = NULL;
+int 	num_elements = 0; // To keep track of the number of elements used
+int		num_allocated = 0; // This is essentially how large the array is
+
+int Add (DArray item)
+{
+        if(num_elements == num_allocated) // Are more refs required?
+        {
+                // Feel free to change the initial number of refs
+                // and the rate at which refs are allocated.
+                if (num_allocated == 0)
+                        num_allocated = 3; // Start off with 3 refs
+                else
+                        num_allocated *= 2; // Double the number
+                                                    // of refs allocated
+
+                // Make the reallocation transactional
+                // by using a temporary variable first
+                void *_tmp = realloc(words, (num_allocated * sizeof(DArray)));
+
+                // If the reallocation didn't go so well,
+                // inform the user and bail out
+                if (!_tmp)
+                {
+                        fprintf(stderr, "ERROR: Couldn't realloc memory!\n");
+                        return(-1);
+                }
+
+                // Things are looking good so far
+                words = (DArray*)_tmp;
+        }
+
+        words[num_elements] = item;
+        num_elements++;
+
+        return num_elements;
+}
+/*!
+END
+/////////////////////////////////////////////////////////////////////////////////
+*/
+long Counter = 0;
+
+void* countWords(void* file){
+
+    FILE* text = fopen((char*)file , "r");
+    DArray wcounter;
+    char* w;
+    while(fscanf(text, "%s", w) != EOF){
+        wcounter.word = malloc((strlen(w) + 1) * sizeof(char));
+		strncpy(wcounter.word, w, strlen(w) + 1);
+        if(Add(wcounter) == -1){
+            exit(1);
+        }
+        Counter++;
+        for (int i = 0; i < num_allocated; i++)
+    	{
+    		free(words[i].word);
+    	}
+
+    	free(words);
+    }
+    printf("Words in \"%s\": %ld\n", (char*)file, Counter);
+    fclose(text);
+    pthread_exit(NULL);
+}
+
+int main(int an, char* av[]){
+    pthread_t threads;
+    char text[strlen(av[1])];
+    strncpy(text, av[1], strlen(av[1]));
+
+    pthread_create(&threads, NULL, countWords, (void*)text);
+
+
+
+    pthread_exit(NULL);
+    return 0;
+}
