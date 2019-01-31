@@ -1,0 +1,2 @@
+mpicc mpiOpenFile.c oAs.c
+mpirun -np 1 ./a.out something.txt

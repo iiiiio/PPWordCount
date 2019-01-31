@@ -68,13 +68,13 @@ size_t fsize(char* file){
 void mpiRead(int p, size_t split_segment, int local_rank, FILE* file_to_read, size_t origin_part){
 
     printf("Check point 4, %d l here 1\n", local_rank);
-    // ZH Query: What does pfm stand for?
+    // ZH Query: What does pfm stand for? part for me
     size_t pfm = (local_rank == 0) ? 1 : (local_rank * split_segment)+1; // beginning segment for the current process
-    // ZH Query: origin_part-1? why?
+    // ZH Query: origin_part-1? why? because there's an EOF character there
     size_t limit = (local_rank < p) ? (local_rank+1) * split_segment : origin_part-1; // reading limit for current process
 
     fseek(file_to_read, pfm, SEEK_SET); /**< start reading bytes*/
-    char* word = (char*)malloc(limit*sizeof(char)); /**< temporary pointer to store characters and form words (reader)*/
+    char* word = (char*)malloc(100*sizeof(char)); /**< temporary pointer to store characters and form words (reader)*/
     //char* words = (char**)malloc(sizeof(word)); /**< add to storage (memorise) */ // storge. will be added by @jasper
     char cur_char;
     size_t track = 0;
@@ -82,7 +82,7 @@ void mpiRead(int p, size_t split_segment, int local_rank, FILE* file_to_read, si
 
     printf("Check point 4, %d here 2\n", local_rank);
     while(pfm < limit){ /**< Read until the limit of the current process*/
-        printf("Check point 4, %d l %zu p %zu c\n", local_rank, pfm, count);
+        printf("Check point 4, %d local_rank %zu partforme %zu count\n", local_rank, pfm, count);
         cur_char = fgetc(file_to_read); // get the next character in starting from fseek()
         if(isupper(cur_char)){ // low case all upper case characters
             cur_char = tolower(cur_char);
