@@ -82,7 +82,7 @@ void mpiRead(int p, size_t split_segment, int local_rank, FILE* file_to_read, si
 
     printf("Check point 4, %d here 2\n", local_rank);
     while(pfm < limit){ /**< Read until the limit of the current process*/
-        printf("Check point 4, %d local_rank %zu partforme %zu count\n", local_rank, pfm, count);
+        printf("Check point 4, %d local_rank %zu partform %zu count\n", local_rank, pfm, count);
         cur_char = fgetc(file_to_read); // get the next character in starting from fseek()
         if(isupper(cur_char)){ // low case all upper case characters
             cur_char = tolower(cur_char);
